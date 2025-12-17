@@ -1,3 +1,4 @@
+import "./style.css";
 
 interface Reserva {
   tipoHabitacion: "standard" | "suite";
@@ -6,25 +7,15 @@ interface Reserva {
 }
 
 const reservas : Reserva[] = [
-  {
-    tipoHabitacion: "standard",
-    pax: 1,
-    noches: 3,
-  },
-  {
-    tipoHabitacion: "standard",
-    pax: 2,
-    noches: 3,
-  },
-  {
-    tipoHabitacion: "suite",
-    pax: 2,
-    noches: 1,
-  },
+  { tipoHabitacion: "standard", pax: 1, noches: 3 },
+  { tipoHabitacion: "standard", pax: 2, noches: 3 },
+  { tipoHabitacion: "suite", pax: 2, noches: 1 },
 ];
 
 const contenedorSubtotales = document.getElementById("subtotales")
 const contenedorTotales = document.getElementById("totales")
+const contenedorSubtotalesTour = document.getElementById("subtotalesTour")
+const contenedorTotalesTour = document.getElementById("totalesTour")
 
 class CalcularPrecio {
   reservas: Reserva[];
@@ -68,12 +59,57 @@ class CalcularPrecio {
 
       const p = document.createElement("p");
       p.textContent = `Reserva ${index +1}: ${totalConIVA.toFixed(2)} euros con IVA`;
-
       contenedorTotales?.appendChild(p);
     });
   }
 };
 
+class CalcularPrecioTour extends CalcularPrecio {
+  descuento: number;
+
+  constructor(reservas: Reserva[]) {
+    super(reservas);
+    this.descuento = 0.15;
+  }
+
+  calcularSubtotal(): void {
+    this.subtotales = [];
+
+    this.reservas.forEach((el, index) => {
+      let subtotal = 100;
+
+      if (el.pax > 1) {
+        subtotal += 40*(el.pax - 1);
+      }
+      
+      subtotal *= el.noches;
+      
+      subtotal *= (1 - this.descuento);
+      
+      this.subtotales.push(subtotal)
+
+      const p = document.createElement("p");
+      p.textContent = `Reserva Tour Operador ${index +1}: ${subtotal} euros sin IVA`;
+
+      contenedorSubtotalesTour?.appendChild(p);
+    });
+  }
+
+  calcularTotal(): void {
+    this.subtotales.forEach((subtotal, index) => {
+      const total = subtotal * (1 + this.iva)
+
+      const p = document.createElement("p");
+      p.textContent = `Reserva Tour Operador ${index +1}: ${total.toFixed(2)} euros con IVA`;
+      contenedorTotalesTour?.appendChild(p);
+    });
+  }
+}
+
 const calculadora = new CalcularPrecio(reservas);
 calculadora.calcularSubtotal();
 calculadora.calcularTotal();
+
+const calculadoraTour = new CalcularPrecioTour(reservas);
+calculadoraTour.calcularSubtotal();
+calculadoraTour.calcularTotal();
